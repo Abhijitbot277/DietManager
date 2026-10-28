@@ -1,6 +1,6 @@
-// Public browser configuration. It is safe to expose the Supabase project URL and publishable/anon key.
+// Public browser configuration. Safe to expose the Supabase project URL and publishable/anon key.
 // NEVER put a service_role or secret key in this file.
 window.DIETMANAGER_SUPABASE_CONFIG = {
-  url: "YOUR_SUPABASE_PROJECT_URL",
-  anonKey: "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY"
+  url: "https://eylyuhitmsdxsqxzbsyy.supabase.co",
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bHl1aGl0bXNkeHNxeHpic3l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxODExNTgsImV4cCI6MjEwODc1NzE1OH0.6pTgIlVSiE7ROy9vmPjOTBHh4VorKZrpejU8sTwHpvM"
 };
