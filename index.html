@@ -48,7 +48,7 @@ var FOOD=[
 {id:'dosa',name:'Plain dosa (medium)',unit:'piece',serving:1,emoji:'🥞',kcal:168,p:4,c:28,f:4.5,fi:1.5,veg:true},
 {id:'sugar',name:'Sugar',unit:'g',serving:5,emoji:'🍬',kcal:387,p:0,c:100,f:0,fi:0,veg:true}
 ];
-var authUser=localStorage.getItem('dietmanager-user')||'';var stateStorageKey=authUser?'dietmanager-account-'+authUser:'dietmanager-v1';var state={profile:{},days:{},customMeasures:[]};try{state=Object.assign(state,JSON.parse(localStorage.getItem(stateStorageKey)||'{}'));state.profile=state.profile||{};state.days=state.days||{};state.customMeasures=state.customMeasures||[]}catch(e){}
+var authUser='';var stateStorageKey='dietmanager-v1';var state={profile:{},days:{},customMeasures:[]};try{state=Object.assign(state,JSON.parse(localStorage.getItem(stateStorageKey)||'{}'));state.profile=state.profile||{};state.days=state.days||{};state.customMeasures=state.customMeasures||[]}catch(e){}
 state.customFoods=state.customFoods||[];state.customFoods.forEach(function(f){if(!food(f.id))FOOD.push(f)});
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function fmt(n){return Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:1})}
@@ -159,8 +159,16 @@ async function openUserSession(user){window.dmUser=user;authUser=user.id;stateSt
 async function signOut(){if(window.dmSupabase)await window.dmSupabase.auth.signOut();window.dmUser=null;localStorage.removeItem('dietmanager-user');location.reload()}
 $('logoutBtn').addEventListener('click',signOut);
 $('authForm').addEventListener('submit',async function(e){e.preventDefault();var email=$('authUsername').value.trim().toLowerCase(),password=$('authPassword').value,confirm=$('authConfirm').value;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){authMessage('Enter a valid email address.',true);return}if(password.length<8){authMessage('Use a password with at least 8 characters.',true);return}var submit=$('authSubmit');submit.disabled=true;submit.textContent='Please wait…';try{var result;if(authMode==='register'){if(password!==confirm){authMessage('Passwords do not match.',true);return}result=await window.dmSupabase.auth.signUp({email:email,password:password});if(result.error)throw result.error;if(!result.data.session){authMessage('Account created. Check your email to confirm it, then log in.',false);setAuthMode('login');return}}else{result=await window.dmSupabase.auth.signInWithPassword({email:email,password:password});if(result.error)throw result.error}if(result.data.user){await openUserSession(result.data.user)}}catch(err){authMessage(err.message||'Authentication failed. Please try again.',true)}finally{submit.disabled=false;submit.textContent=authMode==='register'?'Create account':'Log in'}});
-async function bootAuth(){var config=window.DIETMANAGER_SUPABASE_CONFIG||{};if(!window.supabase||!config.url||!config.anonKey||config.url.indexOf('YOUR_')>=0||config.anonKey.indexOf('YOUR_')>=0){$('authScreen').hidden=false;$('mainApp').style.display='none';authMessage('Supabase setup required: add your Project URL and publishable/anon key in supabase-config.js, then create the database table using supabase-schema.sql.',true);$('authSubmit').disabled=true;return}window.dmSupabase=window.supabase.createClient(config.url,config.anonKey);$('authUsername').type='email';$('authUsername').autocomplete='email';$('authUsername').placeholder='you@example.com';$('authUsername').pattern='';$('authUsername').minLength=5;$('authUsername').maxLength=254;try{var result=await window.dmSupabase.auth.getSession();if(result.error)throw result.error;if(result.data.session){await openUserSession(result.data.session.user)}else{$('authScreen').hidden=false;$('mainApp').style.display='none'}}catch(err){$('authScreen').hidden=false;$('mainApp').style.display='none';authMessage('Could not connect: '+(err.message||'check Supabase setup'),true)}}
-bootAuth();
+function bootAuth(){
+  // Temporary guest mode: bypass the login screen and save data in this browser only.
+  window.dmSupabase=null;window.dmUser=null;
+  $('authScreen').hidden=true;
+  $('mainApp').style.display='';
+  $('userLabel').textContent='Guest mode';
+  $('logoutBtn').style.display='none';
+  startApp();
+}
+
 
 })();
 </script></body></html>
